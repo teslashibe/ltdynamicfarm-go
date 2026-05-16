@@ -1,0 +1,10 @@
+*.test
+*.out
+*.cover
+.idea/
+.vscode/
+.DS_Store
+
+# Local config that may carry creds — never commit
+config.json
+*.local.json

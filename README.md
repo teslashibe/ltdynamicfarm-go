@@ -45,17 +45,21 @@ func main() {
 
 ## Supported operations (v0.1)
 
-| Area      | Methods                                       |
-|-----------|-----------------------------------------------|
-| Auth      | `Login`, `GetMe`, `AuthSnapshot`              |
-| Pages     | `GetDashboard`, `GetPageHTML`                 |
+| Area       | Methods                                                  |
+|------------|----------------------------------------------------------|
+| Auth       | `Login`, `GetMe`, `AuthSnapshot`                         |
+| Pages      | `GetDashboard`, `GetPageHTML`                            |
+| Structured | `GetFarmList`, `GetProbateList`, `GetECampaignHistory` (scaffold — see below) |
 
 `GetPageHTML(ctx, page)` is the generic reader. Useful `page` values:
 
 - `dashboard.aspx`
 - `farmlist.aspx`
 - `farmsprofiles.aspx`
-- `saleshistory.aspx`
+- `saleshistory.aspx` — **variant-dependent**: missing its server-side
+  `saleshistory.html` template on some site variants (e.g.
+  `homeprofile-us`) and returns HTTP 500 there. `GetPageHTML` maps such
+  5xx responses to `ErrPageUnavailable` (see teslashibe/smore#139).
 - `probatelist`
 - `ecampaignhistory`
 - `ecampaign`
@@ -71,12 +75,27 @@ func main() {
 - `subjectlinegrader` / `subjectlinerater`
 - `analyticareareportinterface`
 
+## Structured data (DataTables) — scaffold
+
+The list views render rows client-side via DataTables AJAX, so the
+GenericPage HTML is only a shell. `GetFarmList`, `GetProbateList`, and
+`GetECampaignHistory` (in `structured.go`) are the structured data path:
+they hit the underlying AJAX endpoints and unmarshal the JSON into typed
+structs (`FarmListItem`, `ProbateLeadItem`, `ECampaignRecord`).
+
+**Status: scaffolded, not yet live.** The exact AJAX endpoint paths and
+params are unknown without a live, authenticated DevTools (Network) capture.
+The endpoint constants in `structured.go` are explicit empty placeholders
+marked `TODO(live-capture)`; until they are filled in, these methods return
+`ErrEndpointNotConfigured` (fail loudly — no guessed URLs). See
+teslashibe/smore#140 for the open questions to resolve from the capture.
+
 ## TODO — endpoints to model with typed parsers
 
-- [ ] `farmlist.aspx` → typed `[]FarmListItem`
-- [ ] `saleshistory.aspx` → typed `[]Sale`
-- [ ] `probatelist` → typed `[]ProbateRecord`
-- [ ] `ecampaignhistory` → typed `[]Campaign`
+- [ ] `farmlist.aspx` → typed `[]FarmListItem` (scaffolded; endpoint TBD)
+- [ ] `probatelist` → typed `[]ProbateLeadItem` (scaffolded; endpoint TBD)
+- [ ] `ecampaignhistory` → typed `[]ECampaignRecord` (scaffolded; endpoint TBD)
+- [ ] `saleshistory.aspx` → typed `[]Sale` (variant-dependent; see #139)
 - [ ] `PropertyData.aspx` AJAX → typed `Property`
 - [ ] `getSaved.aspx` AJAX → typed saved-search list
 - [ ] `getCounties.aspx` AJAX → typed county lookup

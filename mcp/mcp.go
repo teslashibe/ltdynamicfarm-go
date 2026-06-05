@@ -11,8 +11,9 @@ func (Provider) Platform() string { return "ltdynamicfarm" }
 
 // Tools returns every MCP tool, in registration order.
 func (Provider) Tools() []mcptool.Tool {
-	out := make([]mcptool.Tool, 0, len(authTools)+len(pageTools))
+	out := make([]mcptool.Tool, 0, len(authTools)+len(pageTools)+len(structuredTools))
 	out = append(out, authTools...)
+	out = append(out, structuredTools...)
 	out = append(out, pageTools...)
 	return out
 }
